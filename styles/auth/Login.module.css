@@ -1,0 +1,21 @@
+.title {
+  font-size: 24px;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.button-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.layout {
+  background: rgb(104, 132, 225);
+}
