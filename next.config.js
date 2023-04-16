@@ -4,7 +4,7 @@ const withLess = require("next-with-less");
 
 const nextConfig = {
     reactStrictMode: true,
-    swcMinify: true,
+    swcMinify: false,
     serverRuntimeConfig: {
         NEXT_PUBLIC_API_HOST: process.env.NEXT_PUBLIC_API_HOST,
         NEXT_PUBLIC_API_TIMEOUT_MS: process.env.NEXT_PUBLIC_API_TIMEOUT_MS,
