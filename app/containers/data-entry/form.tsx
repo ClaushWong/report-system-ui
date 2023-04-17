@@ -78,7 +78,7 @@ export const DataEntryForm = (props: ComponentProps) => {
                         ? "Record updated successfully"
                         : "Record created successfully";
                     ui.notify.success(successMessage);
-                    form.resetFields(["date", "amount"]);
+                    form.resetFields(["amount"]);
                 }
             } catch (err) {
                 ui.notify.error(err);
