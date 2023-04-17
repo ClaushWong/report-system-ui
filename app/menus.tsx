@@ -2,6 +2,8 @@ import {
     DashboardOutlined,
     HomeOutlined,
     UploadOutlined,
+    UserOutlined,
+    UsergroupAddOutlined,
 } from "@ant-design/icons";
 
 export interface IMenu {
@@ -31,5 +33,17 @@ export const PORTAL_MENU: IMenu[] = [
         name: "Data Entry",
         icon: <UploadOutlined />,
         path: "/app/data-entry",
+    },
+    {
+        id: "user-management",
+        name: "User Management",
+        icon: <UserOutlined />,
+        path: "/app/user-management",
+    },
+    {
+        id: "role-management",
+        name: "Role Management",
+        icon: <UsergroupAddOutlined />,
+        path: "/app/role-management",
     },
 ];

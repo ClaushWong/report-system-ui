@@ -17,6 +17,7 @@ import styles from "./css/list.module.css";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import router from "next/router";
 import dayjs from "dayjs";
+import { useAppAuthStore } from "@/stores/index";
 
 const { RangePicker } = DatePicker;
 
@@ -51,6 +52,18 @@ export const DataEntryList = () => {
     const [loading, setLoading] = useState<boolean>(false);
 
     const [form] = Form.useForm();
+
+    const { user } = useAppAuthStore();
+
+    const canFilter =
+        user.role.allowedPermissions.includes("data-entry-filter");
+    const canCreate =
+        user.role.allowedPermissions.includes("data-entry-create");
+    const canEdit = user.role.allowedPermissions.includes("data-entry-edit");
+    const canDelete =
+        user.role.allowedPermissions.includes("data-entry-delete");
+    const canExport =
+        user.role.allowedPermissions.includes("data-entry-export");
 
     const handlers: HandlersProps = {
         refresh: async (filters: any, pagination: PaginationProps) => {
@@ -104,6 +117,12 @@ export const DataEntryList = () => {
             ui.confirm(
                 "Are you sure you want to delete this data entry?",
                 () => {
+                    if (!canDelete) {
+                        ui.notify.error(
+                            "Your account is not allowed to delete record."
+                        );
+                        return;
+                    }
                     setLoading(true);
                     api.dataEntry
                         .delete(id)
@@ -128,6 +147,12 @@ export const DataEntryList = () => {
             handlers.refresh(filters, pagination);
         },
         exportExcel: async () => {
+            if (!canExport) {
+                ui.notify.error(
+                    "Your account is not allowed to export record."
+                );
+                return;
+            }
             await api.dataEntry.exportExcel(filters);
         },
     };
@@ -171,23 +196,31 @@ export const DataEntryList = () => {
             render: (id: string) => {
                 return (
                     <Space>
-                        <Tooltip placement="top" title="Edit">
-                            <Button
-                                type="link"
-                                icon={<EditOutlined />}
-                                onClick={() => {
-                                    handlers.redirectToEdit(id);
-                                }}
-                            />
-                        </Tooltip>
-                        <Tooltip placement="top" title="Delete">
-                            <Button
-                                type="link"
-                                danger
-                                icon={<DeleteOutlined />}
-                                onClick={() => handlers.onDelete(id)}
-                            />
-                        </Tooltip>
+                        {canEdit ? (
+                            <Tooltip placement="top" title="Edit">
+                                <Button
+                                    type="link"
+                                    icon={<EditOutlined />}
+                                    onClick={() => {
+                                        handlers.redirectToEdit(id);
+                                    }}
+                                />
+                            </Tooltip>
+                        ) : (
+                            <></>
+                        )}
+                        {canDelete ? (
+                            <Tooltip placement="top" title="Delete">
+                                <Button
+                                    type="link"
+                                    danger
+                                    icon={<DeleteOutlined />}
+                                    onClick={() => handlers.onDelete(id)}
+                                />
+                            </Tooltip>
+                        ) : (
+                            <></>
+                        )}
                     </Space>
                 );
             },
@@ -209,65 +242,72 @@ export const DataEntryList = () => {
         <PortalContent
             title="Data Entry"
             loading={loading}
-            extra={<CreateNewButton />}
+            extra={canCreate ? <CreateNewButton /> : <></>}
         >
             <Row gutter={[8, 16]}>
-                <Col span={24}>
-                    <Form
-                        form={form}
-                        layout="inline"
-                        onFinish={handlers.onFilter}
-                    >
-                        <Form.Item name="company" className={styles.input}>
-                            <Select
-                                showSearch
-                                onSearch={handlers.getCompany}
-                                filterOption={false}
-                                placeholder="Company"
-                                allowClear
+                {canFilter ? (
+                    <Col span={24}>
+                        <Form
+                            form={form}
+                            layout="inline"
+                            onFinish={handlers.onFilter}
+                        >
+                            <Form.Item name="company" className={styles.input}>
+                                <Select
+                                    showSearch
+                                    onSearch={handlers.getCompany}
+                                    filterOption={false}
+                                    placeholder="Company"
+                                    allowClear
+                                >
+                                    {companies.map((company: any) => {
+                                        return (
+                                            <Select.Option
+                                                key={company._id}
+                                                value={company._id}
+                                            >
+                                                {company.name}
+                                            </Select.Option>
+                                        );
+                                    })}
+                                </Select>
+                            </Form.Item>
+                            <Form.Item
+                                name="dateRange"
+                                className={styles.input}
                             >
-                                {companies.map((company: any) => {
-                                    return (
-                                        <Select.Option
-                                            key={company._id}
-                                            value={company._id}
-                                        >
-                                            {company.name}
-                                        </Select.Option>
-                                    );
-                                })}
-                            </Select>
-                        </Form.Item>
-                        <Form.Item name="dateRange" className={styles.input}>
-                            <RangePicker />
-                        </Form.Item>
-                        <Form.Item>
-                            <Button
-                                type="default"
-                                onClick={() => {
-                                    form.resetFields();
-                                    setFilters({});
-                                }}
-                            >
-                                Reset
-                            </Button>
-                        </Form.Item>
-                        <Form.Item>
-                            <Button type="primary" htmlType="submit">
-                                Submit
-                            </Button>
-                        </Form.Item>
-                        <Form.Item>
-                            <Button
-                                type="primary"
-                                className="btn-success"
-                                onClick={handlers.exportExcel}
-                            >
-                                Export Excel
-                            </Button>
-                        </Form.Item>
-                    </Form>
-                </Col>
+                                <RangePicker />
+                            </Form.Item>
+                            <Form.Item>
+                                <Button
+                                    type="default"
+                                    onClick={() => {
+                                        form.resetFields();
+                                        setFilters({});
+                                    }}
+                                >
+                                    Reset
+                                </Button>
+                            </Form.Item>
+                            <Form.Item>
+                                <Button type="primary" htmlType="submit">
+                                    Submit
+                                </Button>
+                            </Form.Item>
+                            <Form.Item>
+                                <Button
+                                    type="primary"
+                                    className="btn-success"
+                                    onClick={handlers.exportExcel}
+                                >
+                                    Export Excel
+                                </Button>
+                            </Form.Item>
+                        </Form>
+                    </Col>
+                ) : (
+                    <></>
+                )}
                 <Col span={24}>
                     <Typography.Title level={4} className={styles.total}>
                         Total: {pagination.total || 0}

@@ -6,6 +6,7 @@ import router from "next/router";
 import styles from "./css/form.module.css";
 import { isEmpty } from "lodash";
 import dayjs from "dayjs";
+import { useAppAuthStore } from "@/stores/index";
 
 type HandlersProps = {
     getRecord: () => void;
@@ -24,6 +25,12 @@ export const DataEntryForm = (props: ComponentProps) => {
     const [companies, setCompanies] = useState<any[]>([]);
 
     const [form] = Form.useForm();
+
+    const { user } = useAppAuthStore();
+
+    const canCreate =
+        user.role.allowedPermissions.includes("data-entry-create");
+    const canEdit = user.role.allowedPermissions.includes("data-entry-edit");
 
     const handlers: HandlersProps = {
         getRecord: async () => {
@@ -59,6 +66,18 @@ export const DataEntryForm = (props: ComponentProps) => {
         },
         onSubmit: async (formValues: any) => {
             try {
+                if (id && !canEdit) {
+                    ui.notify.error(
+                        "Your account is not allowed to edit record."
+                    );
+                    return;
+                } else if (!canCreate) {
+                    ui.notify.error(
+                        "Your account is not allowed to create record."
+                    );
+                    return;
+                }
+
                 setLoading(true);
 
                 const res = id
@@ -79,6 +98,9 @@ export const DataEntryForm = (props: ComponentProps) => {
                         : "Record created successfully";
                     ui.notify.success(successMessage);
                     form.resetFields(["amount"]);
+                    if (id) {
+                        router.push("/app/data-entry");
+                    }
                 }
             } catch (err) {
                 ui.notify.error(err);

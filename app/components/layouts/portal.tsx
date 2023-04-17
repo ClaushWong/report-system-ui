@@ -30,7 +30,13 @@ const SIDER_WIDTH = 240;
 const Menus = () => {
     const router = useRouter();
 
+    const { user } = useAppAuthStore();
+
     const toMenu = (menu: IMenu, inheritId: string = "") => {
+        if (!user || !user.role.allowedPages.includes(menu.id)) {
+            return null;
+        }
+
         const key = `${inheritId}${menu.id}`;
         if (menu.children && menu.children.length > 0) {
             return (

@@ -1,0 +1,11 @@
+.input {
+    width: 250px;
+}
+
+.select {
+    width: 150px;
+}
+
+.total {
+    text-align: right;
+}

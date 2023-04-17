@@ -19,6 +19,10 @@ export class Auth extends Base {
         return this.http.get<any, { user: IUser }>("/api/core/auth/profile");
     }
 
+    async update(body: any) {
+        return await this.http.put("/api/core/auth/update", body);
+    }
+
     get token() {
         return {
             clear: (): void => {

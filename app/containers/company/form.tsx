@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import router from "next/router";
 import styles from "./css/form.module.css";
 import { isEmpty } from "lodash";
+import { useAppAuthStore } from "@/stores/index";
 
 type HandlersProps = {
     getRecord: () => void;
@@ -22,6 +23,11 @@ export const CompanyForm = (props: ComponentProps) => {
 
     const [form] = Form.useForm();
 
+    const { user } = useAppAuthStore();
+
+    const canEdit = user.role.allowedPermissions.includes("company-edit");
+    const canCreate = user.role.allowedPermissions.includes("company-create");
+
     const handlers: HandlersProps = {
         getRecord: async () => {
             try {
@@ -37,6 +43,17 @@ export const CompanyForm = (props: ComponentProps) => {
         },
         onSubmit: async (formValues: unknown) => {
             try {
+                if (id && !canEdit) {
+                    ui.notify.error(
+                        "Your account is not allowed to edit record."
+                    );
+                    return;
+                } else if (!canCreate) {
+                    ui.notify.error(
+                        "Your account is not allowed to create record."
+                    );
+                    return;
+                }
                 setLoading(true);
 
                 const res = id

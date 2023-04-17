@@ -8,6 +8,8 @@ import { Setting } from "./setting";
 import { Company } from "./company";
 import { DataEntry } from "./data-entry";
 import { Dashboard } from "./dashboard";
+import { Role } from "./role";
+import { User } from "./user";
 
 const http = axios.create({
     baseURL: CONFIG.API.HOST,
@@ -73,6 +75,8 @@ export const api = {
     auth: new Auth(http),
     company: new Company(http),
     dataEntry: new DataEntry(http),
+    role: new Role(http),
+    user: new User(http),
     setting: new Setting(http),
     dashboard: new Dashboard(http),
 };

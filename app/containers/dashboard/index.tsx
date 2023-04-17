@@ -1,4 +1,3 @@
-import { PortalContent } from "@/app/components/contents";
 import { api, ui } from "@/app/services";
 import { Card, Col, Row, Spin, Typography } from "antd";
 import { useEffect, useState } from "react";
