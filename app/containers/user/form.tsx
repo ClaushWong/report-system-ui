@@ -28,6 +28,8 @@ export const UserForm = (props: ComponentProps) => {
 
     const { user } = useAppAuthStore();
 
+    const isAdmin = user.role.name === "admin" && user.role.type === "operator";
+
     const canEdit = user.role.allowedPermissions.includes(
         "user-management-edit"
     );
@@ -98,7 +100,7 @@ export const UserForm = (props: ComponentProps) => {
                 const sendData = {
                     username: formValues.username,
                     name: formValues.name,
-                    type: formValues.type,
+                    type: formValues.type || "client",
                     role: formValues.role,
                     password: formValues.password,
                 };
@@ -142,6 +144,12 @@ export const UserForm = (props: ComponentProps) => {
         if (!isEmpty(id)) handlers.getRecord();
     }, [id]);
 
+    useEffect(() => {
+        if (!isAdmin) {
+            handlers.getRole("client");
+        }
+    }, []);
+
     const title = id ? "Edit User Info" : "Create New User";
     const saveText = id ? "Save" : "Create";
 
@@ -168,24 +176,28 @@ export const UserForm = (props: ComponentProps) => {
                         <Input placeholder="Name" />
                     </Form.Item>
 
-                    <Form.Item
-                        name="type"
-                        label="Type"
-                        rules={[
-                            {
-                                required: true,
-                            },
-                        ]}
-                    >
-                        <Radio.Group
-                            onChange={(event: any) =>
-                                handlers.getRole(event.target.value)
-                            }
+                    {isAdmin ? (
+                        <Form.Item
+                            name="type"
+                            label="Type"
+                            rules={[
+                                {
+                                    required: true,
+                                },
+                            ]}
                         >
-                            <Radio value="operator">Operator</Radio>
-                            <Radio value="client">Client</Radio>
-                        </Radio.Group>
-                    </Form.Item>
+                            <Radio.Group
+                                onChange={(event: any) =>
+                                    handlers.getRole(event.target.value)
+                                }
+                            >
+                                <Radio value="operator">Operator</Radio>
+                                <Radio value="client">Client</Radio>
+                            </Radio.Group>
+                        </Form.Item>
+                    ) : (
+                        <></>
+                    )}
 
                     <Form.Item
                         name="role"
