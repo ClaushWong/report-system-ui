@@ -157,7 +157,9 @@ export const DataEntryList = () => {
             title: "Amount (RM)",
             dataIndex: "amount",
             render: (amount: number) => {
-                return amount.toFixed(2);
+                return amount.toLocaleString("en-US", {
+                    minimumFractionDigits: 2,
+                });
             },
         },
         {
