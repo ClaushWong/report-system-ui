@@ -28,13 +28,15 @@ export const UserForm = (props: ComponentProps) => {
 
     const { user } = useAppAuthStore();
 
-    const isAdmin = user.role.name === "admin" && user.role.type === "operator";
+    const isAdmin =
+        user.role.name?.toLowerCase() === "admin" &&
+        user.role.type?.toLowerCase() === "operator";
 
     const canEdit = user.role.allowedPermissions.includes(
-        "user-management-edit"
+        "user-management-edit",
     );
     const canCreate = user.role.allowedPermissions.includes(
-        "user-management-create"
+        "user-management-create",
     );
 
     const handlers: HandlersProps = {
@@ -61,7 +63,7 @@ export const UserForm = (props: ComponentProps) => {
             if (type) {
                 const roles: any = await api.role.list(
                     { current: 0, pageSize: 0 },
-                    { type }
+                    { type },
                 );
                 if (roles) {
                     setRoleList(
@@ -70,7 +72,7 @@ export const UserForm = (props: ComponentProps) => {
                                 label: role.name,
                                 value: role._id,
                             };
-                        })
+                        }),
                     );
                 }
             }
@@ -79,12 +81,12 @@ export const UserForm = (props: ComponentProps) => {
             try {
                 if (id && !canEdit) {
                     ui.notify.error(
-                        "Your account is not allowed to edit record."
+                        "Your account is not allowed to edit record.",
                     );
                     return;
                 } else if (!canCreate) {
                     ui.notify.error(
-                        "Your account is not allowed to create record."
+                        "Your account is not allowed to create record.",
                     );
                     return;
                 }
@@ -114,7 +116,7 @@ export const UserForm = (props: ComponentProps) => {
                               type: string;
                               role: string;
                               password: string;
-                          }
+                          },
                       )
                     : await api.user.create(
                           sendData as {
@@ -123,7 +125,7 @@ export const UserForm = (props: ComponentProps) => {
                               type: string;
                               role: string;
                               password: string;
-                          }
+                          },
                       );
 
                 if (res) {
@@ -260,8 +262,8 @@ export const UserForm = (props: ComponentProps) => {
                                             }
                                             return Promise.reject(
                                                 new Error(
-                                                    "The password that you entered do not match!"
-                                                )
+                                                    "The password that you entered do not match!",
+                                                ),
                                             );
                                         },
                                     }),
