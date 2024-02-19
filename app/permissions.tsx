@@ -25,49 +25,71 @@ export const PORTAL_PERMISSIONS: IPermissions[] = [
         ],
     },
     {
-        id: "company",
-        name: "Company",
+        id: "client",
+        name: "Client",
         permissions: [
             {
-                id: "company-create",
+                id: "client-create",
                 name: "Create",
             },
             {
-                id: "company-edit",
+                id: "client-edit",
                 name: "Edit",
             },
             {
-                id: "company-delete",
+                id: "client-delete",
                 name: "Delete",
             },
             {
-                id: "company-filter",
+                id: "client-filter",
                 name: "Filter",
             },
         ],
     },
     {
-        id: "data-entry",
-        name: "Data Entry",
+        id: "profile",
+        name: "Profile",
         permissions: [
             {
-                id: "data-entry-create",
+                id: "profile-create",
                 name: "Create",
             },
             {
-                id: "data-entry-edit",
+                id: "profile-edit",
                 name: "Edit",
             },
             {
-                id: "data-entry-delete",
+                id: "profile-delete",
                 name: "Delete",
             },
             {
-                id: "data-entry-filter",
+                id: "profile-filter",
+                name: "Filter",
+            },
+        ],
+    },
+    {
+        id: "transactions",
+        name: "Transactions",
+        permissions: [
+            {
+                id: "transactions-create",
+                name: "Create",
+            },
+            {
+                id: "transactions-edit",
+                name: "Edit",
+            },
+            {
+                id: "transactions-delete",
+                name: "Delete",
+            },
+            {
+                id: "transactions-filter",
                 name: "Filter",
             },
             {
-                id: "data-entry-export",
+                id: "transactions-export",
                 name: "Export",
             },
         ],

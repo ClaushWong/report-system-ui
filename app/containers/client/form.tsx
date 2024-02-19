@@ -1,6 +1,6 @@
 import { PortalContent } from "@/app/components/contents";
 import { api, ui } from "@/app/services";
-import { Button, Select, Form, Input, Tree, Radio, Divider, Space } from "antd";
+import { Button, Divider, Form, Input, Select } from "antd";
 import { useState, useEffect } from "react";
 import router from "next/router";
 import styles from "./css/form.module.css";
@@ -9,7 +9,8 @@ import { useAppAuthStore } from "@/stores/index";
 
 type HandlersProps = {
     getRecord: () => void;
-    getRole: (type: string) => void;
+    getUsers: () => void;
+    getRoles: () => void;
     onSubmit: (formValues: unknown) => void;
 };
 
@@ -17,41 +18,35 @@ type ComponentProps = {
     id?: string;
 };
 
-export const UserForm = (props: ComponentProps) => {
+export const ClientForm = (props: ComponentProps) => {
     const { id } = props;
 
     const [loading, setLoading] = useState<boolean>(false);
-
-    const [roleList, setRoleList] = useState<any[]>([]);
-
+    const [users, setUsers] = useState<any[]>([]);
+    const [roles, setRoles] = useState<any[]>([]);
     const [form] = Form.useForm();
 
     const { user } = useAppAuthStore();
+    const isAdmin: boolean = user?.role?.name?.toLowerCase() === "admin";
 
-    const isAdmin =
-        user.role.name?.toLowerCase() === "admin" &&
-        user.role.type?.toLowerCase() === "operator";
-
-    const canEdit = user.role.allowedPermissions.includes(
-        "user-management-edit",
-    );
-    const canCreate = user.role.allowedPermissions.includes(
-        "user-management-create",
-    );
+    const canEdit = user.role.allowedPermissions.includes("client-edit");
+    const canCreate = user.role.allowedPermissions.includes("client-create");
 
     const handlers: HandlersProps = {
         getRecord: async () => {
             try {
-                const res: any = await api.user.get(id as string);
+                const res: any = await api.client.get(id as string);
                 if (res) {
-                    form.setFieldsValue({
+                    const fields: any = {
                         name: res.name,
                         username: res.username,
-                        type: res.type,
                         role: res.role,
-                    });
+                    };
 
-                    handlers.getRole(res.type);
+                    if (isAdmin) {
+                        fields.user = res.user;
+                    }
+                    form.setFieldsValue(fields);
                 }
             } catch (err) {
                 ui.notify.error(err);
@@ -59,85 +54,96 @@ export const UserForm = (props: ComponentProps) => {
                 setLoading(false);
             }
         },
-        getRole: async (type: string) => {
-            if (type) {
-                const roles: any = await api.role.list(
-                    { current: 0, pageSize: 0 },
-                    { type },
+        getUsers: async () => {
+            try {
+                const res: any = await api.user.list(
+                    {
+                        current: 1,
+                        pageSize: 1000,
+                    },
+                    {},
                 );
-                if (roles) {
-                    setRoleList(
-                        roles.items.map((role: any) => {
-                            return {
-                                label: role.name,
-                                value: role._id,
-                            };
-                        }),
+                if (!!res) {
+                    setUsers(
+                        res.items.map((item: any) => ({
+                            label: item.name,
+                            value: item._id,
+                        })),
                     );
                 }
+            } catch (err) {
+                ui.notify.error(err);
+            } finally {
+                setLoading(false);
             }
         },
-        onSubmit: async (formValues: any) => {
+        getRoles: async () => {
+            try {
+                const res: any = await api.role.list(
+                    {
+                        current: 1,
+                        pageSize: 1000,
+                    },
+                    {
+                        type: "client",
+                    },
+                );
+                if (!!res) {
+                    setRoles(
+                        res.items.map((item: any) => ({
+                            label: item.name,
+                            value: item._id,
+                        })),
+                    );
+                }
+            } catch (err) {
+                ui.notify.error(err);
+            } finally {
+                setLoading(false);
+            }
+        },
+        onSubmit: async (formValues: unknown) => {
             try {
                 if (id && !canEdit) {
-                    ui.notify.error(
-                        "Your account is not allowed to edit record.",
-                    );
+                    ui.notify.error("You are not allowed to edit this record");
                     return;
                 } else if (!canCreate) {
                     ui.notify.error(
-                        "Your account is not allowed to create record.",
+                        "You are not allowed to create a new record",
                     );
                     return;
                 }
-
                 setLoading(true);
 
-                if (id && formValues.password && !formValues.confirmPassword) {
-                    ui.notify.error("Please retype your password to proceed.");
-                    setLoading(false);
-                    return;
-                }
-
-                const sendData = {
-                    username: formValues.username,
-                    name: formValues.name,
-                    type: "operator",
-                    role: formValues.role,
-                    password: formValues.password,
-                };
-
                 const res = id
-                    ? await api.user.update(
+                    ? await api.client.update(
                           id,
-                          sendData as {
-                              username: string;
+                          formValues as {
                               name: string;
-                              type: string;
+                              user?: string;
+                              username: string;
                               role: string;
-                              password: string;
+                              password?: string;
                           },
                       )
-                    : await api.user.create(
-                          sendData as {
-                              username: string;
+                    : await api.client.create(
+                          formValues as {
                               name: string;
-                              type: string;
+                              user?: string;
+                              username: string;
                               role: string;
-                              password: string;
+                              password?: string;
                           },
                       );
-
                 if (res) {
                     const successMessage = id
                         ? "Record updated successfully"
                         : "Record created successfully";
                     ui.notify.success(successMessage);
-                    router.push("/app/user-management");
+                    router.push("/app/client");
                 }
             } catch (err) {
                 ui.notify.error(err);
-                setLoading(false);
             }
         },
     };
@@ -147,10 +153,11 @@ export const UserForm = (props: ComponentProps) => {
     }, [id]);
 
     useEffect(() => {
-        handlers.getRole("operator");
+        handlers.getUsers();
+        handlers.getRoles();
     }, []);
 
-    const title = id ? "Edit User Info" : "Create New User";
+    const title = id ? "Edit Client" : "Add Client";
     const saveText = id ? "Save" : "Create";
 
     return (
@@ -160,49 +167,50 @@ export const UserForm = (props: ComponentProps) => {
                     form={form}
                     layout="vertical"
                     onFinish={handlers.onSubmit}
-                    validateMessages={{
-                        required: "${label} is required",
-                    }}
+                    validateMessages={{ required: "${label} is required" }}
                 >
-                    <Form.Item
-                        name="name"
-                        label="Name"
-                        rules={[
-                            {
-                                required: true,
-                            },
-                        ]}
-                    >
-                        <Input placeholder="Name" />
-                    </Form.Item>
-
-                    <Form.Item
-                        name="role"
-                        label="Role"
-                        rules={[
-                            {
-                                required: true,
-                            },
-                        ]}
-                    >
-                        <Select
-                            disabled={roleList.length == 0}
-                            options={roleList}
-                            allowClear
-                        />
-                    </Form.Item>
-
-                    {!id ? (
-                        <Divider orientation="left">Login Credential</Divider>
-                    ) : (
-                        <></>
+                    {isAdmin && (
+                        <Form.Item
+                            label="User"
+                            name="user"
+                            rules={[
+                                { required: true, message: "User is required" },
+                            ]}
+                        >
+                            <Select options={users} />
+                        </Form.Item>
                     )}
                     <Form.Item
-                        name="username"
-                        label="Username"
+                        label="Name"
+                        name="name"
                         rules={[
                             {
                                 required: true,
+                                message: "Name is required",
+                            },
+                        ]}
+                    >
+                        <Input />
+                    </Form.Item>
+                    {isAdmin && (
+                        <Form.Item
+                            label="Role"
+                            name="role"
+                            rules={[
+                                { required: true, message: "Role is required" },
+                            ]}
+                        >
+                            <Select options={roles} />
+                        </Form.Item>
+                    )}
+                    <Divider orientation="left">Login Credentials</Divider>
+                    <Form.Item
+                        label="Username"
+                        name="username"
+                        rules={[
+                            {
+                                required: true,
+                                message: "Username is required",
                             },
                         ]}
                     >
@@ -250,7 +258,11 @@ export const UserForm = (props: ComponentProps) => {
                     )}
 
                     <Form.Item>
-                        <Button type="primary" htmlType="submit">
+                        <Button
+                            type="primary"
+                            htmlType="submit"
+                            disabled={!canEdit && !canCreate}
+                        >
                             {saveText}
                         </Button>
                     </Form.Item>

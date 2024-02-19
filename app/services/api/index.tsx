@@ -10,6 +10,7 @@ import { DataEntry } from "./data-entry";
 import { Dashboard } from "./dashboard";
 import { Role } from "./role";
 import { User } from "./user";
+import { Client } from "./client";
 
 const http = axios.create({
     baseURL: CONFIG.API.HOST,
@@ -32,7 +33,7 @@ http.interceptors.request.use(
     },
     (error) => {
         return Promise.reject(error);
-    }
+    },
 );
 
 http.interceptors.response.use(
@@ -48,7 +49,7 @@ http.interceptors.response.use(
                     res = JSON.parse(await error.response.data.text());
                 } else if (
                     error?.response?.headers?.["content-type"].indexOf(
-                        "/json"
+                        "/json",
                     ) > 0
                 ) {
                     res = error.response.data;
@@ -68,7 +69,7 @@ http.interceptors.response.use(
             }
         }
         return Promise.reject(res);
-    }
+    },
 );
 
 export const api = {
@@ -79,4 +80,5 @@ export const api = {
     user: new User(http),
     setting: new Setting(http),
     dashboard: new Dashboard(http),
+    client: new Client(http),
 };

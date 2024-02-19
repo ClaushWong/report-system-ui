@@ -63,7 +63,7 @@ export const Dashboard = () => {
     };
 
     useEffect(() => {
-        handlers.getData();
+        // handlers.getData();
     }, []);
 
     return (

@@ -1,9 +1,9 @@
 import {
     DashboardOutlined,
-    HomeOutlined,
-    UploadOutlined,
     UserOutlined,
     UsergroupAddOutlined,
+    SolutionOutlined,
+    PayCircleOutlined,
 } from "@ant-design/icons";
 
 export interface IMenu {
@@ -23,16 +23,22 @@ export const PORTAL_MENU: IMenu[] = [
         icon: <DashboardOutlined />,
     },
     {
-        id: "company",
-        name: "Company",
-        icon: <HomeOutlined />,
-        path: "/app/company",
+        id: "client",
+        name: "Client",
+        path: "/app/client",
+        icon: <UserOutlined />,
     },
     {
-        id: "data-entry",
-        name: "Data Entry",
-        icon: <UploadOutlined />,
-        path: "/app/data-entry",
+        id: "profile",
+        name: "Profile",
+        icon: <SolutionOutlined />,
+        path: "/app/profile",
+    },
+    {
+        id: "transactions",
+        name: "Transactions",
+        icon: <PayCircleOutlined />,
+        path: "/app/transactions",
     },
     {
         id: "user-management",

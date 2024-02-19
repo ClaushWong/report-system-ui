@@ -101,7 +101,7 @@ export const DataEntryList = () => {
 
             const res: any = await api.company.list(
                 { current: 1, pageSize: 10 },
-                query
+                query,
             );
             if (res) {
                 setCompanies(res.items);
@@ -119,7 +119,7 @@ export const DataEntryList = () => {
                 () => {
                     if (!canDelete) {
                         ui.notify.error(
-                            "Your account is not allowed to delete record."
+                            "Your account is not allowed to delete record.",
                         );
                         return;
                     }
@@ -129,7 +129,7 @@ export const DataEntryList = () => {
                         .then((res: any) => {
                             if (res) {
                                 ui.notify.success(
-                                    "Record deleted successfully"
+                                    "Record deleted successfully",
                                 );
                                 handlers.refresh(filters, pagination);
                             }
@@ -140,7 +140,7 @@ export const DataEntryList = () => {
                         .finally(() => {
                             setLoading(false);
                         });
-                }
+                },
             );
         },
         onPageChange: (pagination: any) => {
@@ -149,7 +149,7 @@ export const DataEntryList = () => {
         exportExcel: async () => {
             if (!canExport) {
                 ui.notify.error(
-                    "Your account is not allowed to export record."
+                    "Your account is not allowed to export record.",
                 );
                 return;
             }

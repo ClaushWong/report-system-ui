@@ -1,31 +1,23 @@
 import { PortalContent } from "@/app/components/contents";
 import { api, ui } from "@/app/services";
+
+import { useState, useEffect } from "react";
+import router from "next/router";
+import styles from "./css/list.module.css";
+
 import {
     Button,
     Col,
     Form,
+    Input,
     Row,
-    Select,
     Space,
     Table,
     Tooltip,
     Typography,
-    Input,
 } from "antd";
-import { useState, useEffect } from "react";
-import styles from "./css/list.module.css";
-import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
-import router from "next/router";
-import { capitalize } from "lodash";
 import { useAppAuthStore } from "@/stores/index";
-
-type HandlersProps = {
-    refresh: (filters: unknown, pagination: PaginationProps) => void;
-    onFilter: (query: unknown) => void;
-    redirectToEdit: (id: string) => void;
-    onDelete: (id: string) => void;
-    onPageChange: (pagination: any) => void;
-};
+import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 
 type PaginationProps = {
     total?: number;
@@ -33,38 +25,32 @@ type PaginationProps = {
     pageSize: number;
 };
 
-export const UserList = () => {
+type HandlersProps = {
+    refresh: (filters: unknown, pagination: PaginationProps) => void;
+    onFilter: (filters: unknown) => void;
+    redirectToEdit: (id: string) => void;
+    onDelete: (id: string) => void;
+    onPageChange: (pagination: any) => void;
+};
+
+export const ClientList = () => {
     const [pagination, setPagination] = useState<PaginationProps>({
         total: 0,
-        current: 0,
+        current: 1,
         pageSize: 10,
     });
 
     const [items, setItems] = useState<any[]>([]);
-
+    const [loading, setLoading] = useState(false);
     const [filters, setFilters] = useState<any>({});
-
-    const [loading, setLoading] = useState<boolean>(false);
-
     const [form] = Form.useForm();
-
     const { user } = useAppAuthStore();
+    const isAdmin = user?.role?.name?.toLowerCase() === "admin";
 
-    const canFilter = user.role.allowedPermissions.includes(
-        "user-management-filter",
-    );
-    const canCreate = user.role.allowedPermissions.includes(
-        "user-management-create",
-    );
-    const canEdit = user.role.allowedPermissions.includes(
-        "user-management-edit",
-    );
-    const canDelete = user.role.allowedPermissions.includes(
-        "user-management-delete",
-    );
-    const canExport = user.role.allowedPermissions.includes(
-        "user-management-export",
-    );
+    const canFilter = user.role.allowedPermissions.includes("client-filter");
+    const canCreate = user.role.allowedPermissions.includes("client-create");
+    const canEdit = user.role.allowedPermissions.includes("client-edit");
+    const canDelete = user.role.allowedPermissions.includes("client-delete");
 
     const handlers: HandlersProps = {
         refresh: async (filters: any, pagination: PaginationProps) => {
@@ -73,13 +59,15 @@ export const UserList = () => {
                 const query = {
                     name: filters.name,
                 };
-                const res: any = await api.user.list(pagination, query);
+                if (isAdmin) {
+                    query.user = filters.user;
+                }
+                const res: any = await api.client.list(pagination, query);
                 if (res) {
                     setPagination({
                         ...pagination,
                         total: res.total,
                     });
-
                     setItems(res.items);
                 }
             } catch (err) {
@@ -88,15 +76,14 @@ export const UserList = () => {
                 setLoading(false);
             }
         },
-
-        onFilter: (query: unknown) => {
-            setFilters(query);
+        onFilter: (filters: any) => {
+            setFilters(filters);
         },
         redirectToEdit: (id: string) => {
-            router.push(`/app/user-management/${id}`);
+            router.push(`/app/client/${id}`);
         },
         onDelete: async (id: string) => {
-            ui.confirm("Are you sure you want to delete this user?", () => {
+            ui.confirm("Are you sure you want to delete this record?", () => {
                 if (!canDelete) {
                     ui.notify.error(
                         "Your account is not allowed to delete record.",
@@ -104,11 +91,11 @@ export const UserList = () => {
                     return;
                 }
                 setLoading(true);
-                api.role
+                api.client
                     .delete(id)
                     .then((res: any) => {
                         if (res) {
-                            ui.notify.success("Record deleted successfully");
+                            ui.notify.success("Client deleted successfully");
                             handlers.refresh(filters, pagination);
                         }
                     })
@@ -133,56 +120,59 @@ export const UserList = () => {
         handlers.refresh(filters, { current: 1, pageSize: 10 });
     }, [filters]);
 
-    const columns: any = [
+    const fieldColumns: any[] = [
         {
             title: "Name",
             dataIndex: "name",
         },
-        {
-            title: "Action",
-            dataIndex: "_id",
-            width: "50px",
-            align: "center",
-            fixed: "right",
-            render: (id: string) => {
-                return (
-                    <Space>
-                        {canEdit ? (
-                            <Tooltip placement="top" title="Edit">
-                                <Button
-                                    type="link"
-                                    icon={<EditOutlined />}
-                                    onClick={() => {
-                                        handlers.redirectToEdit(id);
-                                    }}
-                                />
-                            </Tooltip>
-                        ) : (
-                            <></>
-                        )}
-                        {canDelete ? (
-                            <Tooltip placement="top" title="Delete">
-                                <Button
-                                    type="link"
-                                    danger
-                                    icon={<DeleteOutlined />}
-                                    onClick={() => handlers.onDelete(id)}
-                                />
-                            </Tooltip>
-                        ) : (
-                            <></>
-                        )}
-                    </Space>
-                );
-            },
-        },
     ];
+
+    if (user?.role?.name?.toLowerCase() === "admin") {
+        fieldColumns.push({
+            title: "User",
+            dataIndex: ["user", "name"],
+        });
+    }
+
+    const actionColumns: any = {
+        title: "Action",
+        dataIndex: "_id",
+        width: "50px",
+        align: "center",
+        fixed: "right",
+        render: (id: string) => {
+            return (
+                <Space>
+                    {canEdit && (
+                        <Tooltip placement="top" title="Edit">
+                            <Button
+                                type="link"
+                                icon={<EditOutlined />}
+                                onClick={() => handlers.redirectToEdit(id)}
+                            />
+                        </Tooltip>
+                    )}
+                    {canDelete && (
+                        <Tooltip placement="top" title="Delete">
+                            <Button
+                                type="link"
+                                icon={<DeleteOutlined />}
+                                onClick={() => handlers.onDelete(id)}
+                            />
+                        </Tooltip>
+                    )}
+                </Space>
+            );
+        },
+    };
+
+    const columns: any[] = [...fieldColumns, actionColumns];
 
     const CreateNewButton = () => {
         return (
             <Button
                 type="primary"
-                onClick={() => router.push("/app/user-management/create")}
+                onClick={() => router.push("/app/client/create")}
             >
                 + New
             </Button>
@@ -191,7 +181,7 @@ export const UserList = () => {
 
     return (
         <PortalContent
-            title="User Management"
+            title="Clients"
             loading={loading}
             extra={canCreate ? <CreateNewButton /> : <></>}
         >
@@ -206,6 +196,11 @@ export const UserList = () => {
                             <Form.Item name="name" className={styles.input}>
                                 <Input placeholder="Name" />
                             </Form.Item>
+                            {isAdmin && (
+                                <Form.Item name="user" className={styles.input}>
+                                    <Input placeholder="User" />
+                                </Form.Item>
+                            )}
                             <Form.Item>
                                 <Button
                                     type="default"
