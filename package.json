@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
-    "@ant-design/pro-components": "^5.0.0",
+    "@ant-design/pro-components": "^2.4.4",
     "antd": "^5.4.2",
     "axios": "^0.27.2",
     "chart.js": "^4.2.1",
@@ -37,6 +37,6 @@
     "@types/react-dom": "18.0.6",
     "eslint": "8.23.0",
     "eslint-config-next": "12.2.5",
-    "typescript": "4.8.2"
+    "typescript": "5.4.5"
   }
 }
