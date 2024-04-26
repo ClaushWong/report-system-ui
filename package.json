@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
-    "@ant-design/pro-components": "^2.4.4",
+    "@ant-design/pro-components": "^5.0.0",
     "antd": "^5.4.2",
     "axios": "^0.27.2",
     "chart.js": "^4.2.1",
