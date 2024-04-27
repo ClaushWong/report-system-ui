@@ -6,6 +6,7 @@ type BodyDTO = {
   category: string;
   date: string;
   amount: number;
+  remarks: string;
 };
 
 type QueryProps = {

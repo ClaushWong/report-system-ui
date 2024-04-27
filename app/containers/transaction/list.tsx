@@ -114,7 +114,7 @@ export const TransactionList = () => {
       setFilters(query);
     },
     redirectToEdit: (id: string) => {
-      router.push(`/app/data-entry/${id}`);
+      router.push(`/app/transactions/${id}`);
     },
     onDelete: async (id: string) => {
       ui.confirm("Are you sure you want to delete this data entry?", () => {
@@ -175,6 +175,10 @@ export const TransactionList = () => {
     {
       title: "Category",
       dataIndex: "category",
+    },
+    {
+      title: "Remarks",
+      dataIndex: "remarks",
     },
     {
       title: "Amount (RM)",

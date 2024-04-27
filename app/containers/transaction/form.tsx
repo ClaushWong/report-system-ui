@@ -42,6 +42,7 @@ export const TransactionForm = (props: ComponentProps) => {
             client: res.client,
             category: res.category,
             date: dayjs(res.date),
+            remarks: res?.remarks,
             amount: res.amount,
           });
         }
@@ -83,12 +84,14 @@ export const TransactionForm = (props: ComponentProps) => {
               client: formValues.client,
               category: formValues.category,
               date: formValues.date.format("YYYY-MM-DD"),
+              remarks: formValues.remarks,
               amount: formValues.amount,
             })
           : await api.transaction.create({
               client: formValues.client,
               category: formValues.category,
               date: formValues.date.format("YYYY-MM-DD"),
+              remarks: formValues.remarks,
               amount: formValues.amount,
             });
 
@@ -168,6 +171,13 @@ export const TransactionForm = (props: ComponentProps) => {
             rules={[{ required: true }]}
           >
             <DatePicker className={styles.maxWidth} />
+          </Form.Item>
+          <Form.Item
+            name="remarks"
+            label="Remarks"
+            rules={[{ required: false }]}
+          >
+            <Input />
           </Form.Item>
           <Form.Item
             name="amount"
