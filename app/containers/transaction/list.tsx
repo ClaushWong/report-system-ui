@@ -11,6 +11,7 @@ import {
   Tooltip,
   Typography,
   DatePicker,
+  Input,
 } from "antd";
 import { useState, useEffect } from "react";
 import styles from "./css/list.module.css";
@@ -79,6 +80,8 @@ export const TransactionList = () => {
                 .map((date: any) => date.format("YYYY-MM-DD"))
                 .join(",")
             : "",
+          client: filters.client || "",
+          remarks: filters.remarks || "",
         };
         const res: any = await api.transaction.list(pagination, query);
         if (res) {
@@ -269,6 +272,9 @@ export const TransactionList = () => {
               </Form.Item>
               <Form.Item name="dateRange" className={styles.input}>
                 <RangePicker />
+              </Form.Item>
+              <Form.Item name="remarks" className={styles.input}>
+                <Input />
               </Form.Item>
               <Form.Item>
                 <Button
