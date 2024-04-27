@@ -38,6 +38,12 @@ export const Dashboard = () => {
         value: 0,
       },
     ],
+    category_vs_total_amount: [
+      {
+        label: "",
+        value: 0,
+      },
+    ],
   });
 
   const handlers: HandlersProps = {
@@ -98,6 +104,12 @@ export const Dashboard = () => {
         <Typography.Title level={4}>Client VS Total Amount</Typography.Title>
         <br />
         <BarChart data={data.client_vs_total_amount} decimal={2} />
+      </Card>
+      <br />
+      <Card>
+        <Typography.Title level={4}>Category VS Total Amount</Typography.Title>
+        <br />
+        <BarChart data={data.category_vs_total_amount} decimal={2} />
       </Card>
     </Spin>
   );
