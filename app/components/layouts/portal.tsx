@@ -33,6 +33,7 @@ const Menus = () => {
     const { user } = useAppAuthStore();
 
     const toMenu = (menu: IMenu, inheritId: string = "") => {
+        console.log(user);
         if (!user || !user.role.allowedPages.includes(menu.id)) {
             return null;
         }
